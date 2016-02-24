@@ -35,11 +35,12 @@ $(function() {
 		$("html").addClass("web-app-mode");
 	}
 
+	var pop;
 	try {
-		var pop = new Audio();
+		pop = new Audio();
 		pop.src = "/audio/pop.ogg";
-	} catch(e) {
-		var pop = {
+	} catch (e) {
+		pop = {
 			play: $.noop
 		};
 	}
@@ -73,7 +74,7 @@ $(function() {
 		});
 	});
 
-	socket.on("auth", function(data) {
+	socket.on("auth", function(/* data */) {
 		var body = $("body");
 		var login = $("#sign-in");
 		if (!login.length) {
@@ -129,6 +130,7 @@ $(function() {
 					channels: channels
 				})
 			);
+			channels.forEach(renderChannelMessages);
 			confirmExit();
 		}
 
@@ -171,6 +173,7 @@ $(function() {
 				channels: [data.chan]
 			})
 		);
+		renderChannelMessages(data.chan);
 		var chan = sidebar.find(".chan")
 			.sort(function(a, b) { return $(a).data("id") - $(b).data("id"); })
 			.last();
@@ -181,28 +184,71 @@ $(function() {
 		chan.click();
 	});
 
-	socket.on("msg", function(data) {
+	function buildChatMessage(data) {
+		var type = data.msg.type;
 		var target = "#chan-" + data.chan;
-		if (data.msg.type == "error") {
+		if (type === "error") {
 			target = "#chan-" + chat.find(".active").data("id");
 		}
 
 		var chan = chat.find(target);
 		var from = data.msg.from;
+		var msg;
 
-		chan.find(".messages")
-			.append(render("msg", {messages: [data.msg]}))
-			.trigger("msg", [
-				target,
-				data.msg
-			]);
+		if ([
+			"invite",
+			"join",
+			"mode",
+			"kick",
+			"nick",
+			"part",
+			"quit",
+			"topic",
+			"action",
+		].indexOf(type) !== -1) {
+			switch (type) {
+			case "invite": data.msg.formattedAction = "invited " + data.msg.target + " to"; break;
+			case "join": data.msg.formattedAction = "has joined the channel"; break;
+			case "mode": data.msg.formattedAction = "sets mode"; break;
+			case "kick": data.msg.formattedAction = "has kicked"; break;
+			case "nick": data.msg.formattedAction = "is now known as"; break;
+			case "part": data.msg.formattedAction = "has left the channel"; break;
+			case "quit": data.msg.formattedAction = "has quit"; break;
+			case "topic": data.msg.formattedAction = "has changed the topic to:"; break;
+			default: data.msg.formattedAction = "";
+			}
 
-		if (!chan.hasClass("channel")) {
-			return;
+			msg = $(render("msg_action", data.msg));
+		} else {
+			msg = $(render("msg", data.msg));
 		}
 
-		var type = data.msg.type;
-		if (type == "message" || type == "action") {
+		var text = msg.find(".text");
+		if (text.find("i").size() === 1) {
+			text = text.find("i");
+		}
+		// Channels names are strings (beginning with a '&' or '#' character)
+		// of length up to 200 characters.
+		// See https://tools.ietf.org/html/rfc1459#section-1.3
+		text.html(text.html().replace(/(^|\s)([#&][^\x07\x2C\s]{0,199})/ig,
+				'$1<span class="inline-channel" role="button" tabindex="0" data-chan="$2">$2</span>'));
+		text.find("span.inline-channel")
+			.on("click", function() {
+				var chan = $(".network")
+					.find(".chan.active")
+					.parent(".network")
+					.find(".chan[data-title='" + $(this).data("chan") + "']");
+				if (chan.size() === 1) {
+					chan.click();
+				} else {
+					socket.emit("input", {
+						target: chat.data("id"),
+						text: "/join " + $(this).data("chan")
+					});
+				}
+			});
+
+		if ((type === "message" || type === "action") && chan.hasClass("channel")) {
 			var nicks = chan.find(".users").data("nicks");
 			if (nicks) {
 				var find = nicks.indexOf(from);
@@ -211,16 +257,44 @@ $(function() {
 				}
 			}
 		}
+
+		return msg;
+	}
+
+	function buildChannelMessages(channel, messages) {
+		return messages.reduce(function(docFragment, message) {
+			docFragment.append(buildChatMessage({
+				chan: channel,
+				msg: message
+			}));
+			return docFragment;
+		}, $(document.createDocumentFragment()));
+	}
+
+	function renderChannelMessages(data) {
+		var documentFragment = buildChannelMessages(data.id, data.messages);
+		chat.find("#chan-" + data.id + " .messages").append(documentFragment);
+	}
+
+	socket.on("msg", function(data) {
+		var msg = buildChatMessage(data);
+		var target = "#chan-" + data.chan;
+		chat.find(target + " .messages")
+			.append(msg)
+			.trigger("msg", [
+				target,
+				data.msg
+			]);
 	});
 
 	socket.on("more", function(data) {
-		var target = data.chan;
+		var documentFragment = buildChannelMessages(data.chan, data.messages);
 		var chan = chat
-			.find("#chan-" + target)
+			.find("#chan-" + data.chan)
 			.find(".messages")
-			.prepend(render("msg", {messages: data.messages}))
+			.prepend(documentFragment)
 			.end();
-		if (data.messages.length != 100) {
+		if (data.messages.length !== 100) {
 			chan.find(".show-more").removeClass("show");
 		}
 	});
@@ -274,7 +348,7 @@ $(function() {
 		});
 
 		if (next !== null) {
-			var id = next.data("id");
+			id = next.data("id");
 			sidebar.find("[data-id=" + id + "]").click();
 		} else {
 			sidebar.find(".chan")
@@ -315,9 +389,8 @@ $(function() {
 	});
 
 	socket.on("topic", function(data) {
-		// .text() escapes HTML but not quotes. That only matters with text inside attributes.
 		var topic = $("#chan-" + data.chan).find(".header .topic");
-		topic.text(data.topic);
+		topic.html(Handlebars.helpers.parse(data.topic));
 		// .attr() is safe escape-wise but consider the capabilities of the attribute
 		topic.attr("title", data.topic);
 	});
@@ -346,6 +419,7 @@ $(function() {
 		part: true,
 		thumbnails: true,
 		quit: true,
+		notifyAllMessages: false,
 	}, $.cookie("settings"));
 
 	for (var i in options) {
@@ -371,10 +445,11 @@ $(function() {
 			"nick",
 			"part",
 			"quit",
+			"notifyAllMessages",
 		].indexOf(name) !== -1) {
 			chat.toggleClass("hide-" + name, !self.prop("checked"));
 		}
-		if (name == "colors") {
+		if (name === "colors") {
 			chat.toggleClass("no-colors", !self.prop("checked"));
 		}
 	}).find("input")
@@ -383,7 +458,7 @@ $(function() {
 	$("#badge").on("change", function() {
 		var self = $(this);
 		if (self.prop("checked")) {
-			if (Notification.permission != "granted") {
+			if (Notification.permission !== "granted") {
 				Notification.requestPermission();
 			}
 		}
@@ -407,7 +482,6 @@ $(function() {
 		.tab(complete, {hint: false});
 
 	var form = $("#form");
-	var submit = $("#submit");
 
 	form.on("submit", function(e) {
 		e.preventDefault();
@@ -428,7 +502,7 @@ $(function() {
 			var text = "";
 			if (window.getSelection) {
 				text = window.getSelection().toString();
-			} else if (document.selection && document.selection.type != "Control") {
+			} else if (document.selection && document.selection.type !==  "Control") {
 				text = document.selection.createRange().text;
 			}
 			if (!text) {
@@ -573,17 +647,19 @@ $(function() {
 		var isQuery = button.hasClass("query");
 		var type = msg.type;
 		var highlight = type.contains("highlight");
-		if (highlight || isQuery) {
+		var message = type.contains("message");
+		var settings = $.cookie("settings") || {};
+		if (highlight || isQuery || (settings.notifyAllMessages && message)) {
 			if (!document.hasFocus() || !$(target).hasClass("active")) {
-				var settings = $.cookie("settings") || {};
 				if (settings.notification) {
 					pop.play();
 				}
 				favico.badge("!");
-				if (settings.badge && Notification.permission == "granted") {
+				if (settings.badge && Notification.permission === "granted") {
 					var notify = new Notification(msg.from + " says:", {
 						body: msg.text.trim(),
-						icon: "/img/logo-64.png"
+						icon: "/img/logo-64.png",
+						tag: target
 					});
 					notify.onclick = function() {
 						window.focus();
@@ -640,7 +716,7 @@ $(function() {
 		var content = self.parent().next(".toggle-content");
 		if (bottom && !content.hasClass("show")) {
 			var img = content.find("img");
-			if (img.length != 0 && !img.width()) {
+			if (img.length !== 0 && !img.width()) {
 				img.on("load", function() {
 					chat.scrollBottom();
 				});
@@ -678,7 +754,7 @@ $(function() {
 		form.find(".btn")
 			.attr("disabled", true)
 			.end();
-		if (form.closest(".window").attr("id") == "connect") {
+		if (form.closest(".window").attr("id") === "connect") {
 			event = "conn";
 		}
 		var values = {};
@@ -732,8 +808,8 @@ $(function() {
 	Mousetrap.bind([
 		"command+k",
 		"ctrl+shift+l"
-	], function (e) {
-		if(e.target === input[0]) {
+	], function(e) {
+		if (e.target === input[0]) {
 			clear();
 			e.preventDefault();
 		}
@@ -771,7 +847,7 @@ $(function() {
 			words.push(nicks[i]);
 		}
 
-		var channels = sidebar.find(".chan")
+		sidebar.find(".chan")
 			.each(function() {
 				var self = $(this);
 				if (!self.hasClass("lobby")) {
@@ -875,7 +951,7 @@ $(function() {
 		}
 		array.splice(new_index, 0, array.splice(old_index, 1)[0]);
 		return array;
-	};
+	}
 
 	document.addEventListener(
 		"visibilitychange",

@@ -9,7 +9,7 @@ module.exports = function(irc, network) {
 			return;
 		}
 		var from = data.nick;
-		if (from == irc.me) {
+		if (from === irc.me) {
 			network.channels = _.without(network.channels, chan);
 			client.save();
 			client.emit("part", {
@@ -22,9 +22,14 @@ module.exports = function(irc, network) {
 				chan: chan.id,
 				users: chan.users
 			});
+			var reason = data.message || "";
+			if (reason.length > 0) {
+				reason = "(" + reason + ")";
+			}
 			var msg = new Msg({
 				type: Msg.Type.PART,
 				mode: chan.getMode(from),
+				text: reason,
 				from: from
 			});
 			chan.messages.push(msg);

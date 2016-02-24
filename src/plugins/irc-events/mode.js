@@ -14,14 +14,14 @@ module.exports = function(irc, network) {
 				from = data.target;
 			}
 			var self = false;
-			if (from.toLowerCase() == irc.me.toLowerCase()) {
+			if (from.toLowerCase() === irc.me.toLowerCase()) {
 				self = true;
 			}
 			var msg = new Msg({
 				type: Msg.Type.MODE,
 				mode: chan.getMode(from),
 				from: from,
-				text: data.mode + " " + data.client,
+				text: data.mode + " " + (data.client || ""),
 				self: self
 			});
 			chan.messages.push(msg);
