@@ -129,6 +129,7 @@
 				kazoo.init(paramsInit);
 				function login(){
 					var kazooParams = {
+						version: 'sipjs',
 						wsUrl: 'ws://'+document.getElementById('realm').value+':8080',
 						rtmpUrl: 'rtmp://'+document.getElementById('realm').value+'/sip',
 						realm: document.getElementById('realm').value,
