@@ -12,8 +12,8 @@ var paramsInit = {
 kazoo.init(paramsInit);
 function login(){
     var kazooParams = {
-        wsUrl: 'wss://'+document.getElementById('realm').value+':8080',
-        rtmpUrl: 'rtmp://'+document.getElementById('realm').value+'/sip',
+        wsUrl: 'ws://'+document.getElementById('proxy').value+':8080',
+        rtmpUrl: 'rtmp://'+document.getElementById('proxy').value+'/sip',
         realm: document.getElementById('realm').value,
         privateIdentity: document.getElementById('privateIdentity').value,
         publicIdentity: 'sip:'+document.getElementById('privateIdentity').value+'@'+document.getElementById('realm').value,
