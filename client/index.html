@@ -129,8 +129,8 @@
 				kazoo.init(paramsInit);
 				function login(){
 					var kazooParams = {
-						wsUrl: 'ws://10.26.0.41:8080',
-						rtmpUrl: 'rtmp://10.26.0.41/sip',
+						wsUrl: 'ws://'+document.getElementById('realm').value+':8080',
+						rtmpUrl: 'rtmp://'+document.getElementById('realm').value+'/sip',
 						realm: document.getElementById('realm').value,
 						privateIdentity: document.getElementById('privateIdentity').value,
 						publicIdentity: document.getElementById('publicIdentity').value,

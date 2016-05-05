@@ -1260,15 +1260,13 @@ div.kazoo-dialer {
 	border-radius: 2px;
 	bottom: 54px;
 	left: 5px;
-	line-height: 48px;
 	position: absolute;
 	text-align: center;
 	width: 210px;
+	color: #99a2b4;
 }
 div.demo-block {
-	float: left;
-	margin: 10px;
-	padding: 10px;
+
 }
 div.demo-flash-error {
 	color: red;
