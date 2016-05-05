@@ -157,7 +157,7 @@ $(function() {
 			}
 		}
 		
-		$("kazoo-dialer").show();
+		$("#kazoo-dialer").show();
 
 		sortable();
 	});
