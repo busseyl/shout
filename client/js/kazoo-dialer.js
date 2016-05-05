@@ -12,11 +12,11 @@ var paramsInit = {
 kazoo.init(paramsInit);
 function login(){
     var kazooParams = {
-        wsUrl: 'ws://'+document.getElementById('realm').value+':8080',
+        wsUrl: 'wss://'+document.getElementById('realm').value+':8080',
         rtmpUrl: 'rtmp://'+document.getElementById('realm').value+'/sip',
         realm: document.getElementById('realm').value,
         privateIdentity: document.getElementById('privateIdentity').value,
-        publicIdentity: document.getElementById('publicIdentity').value,
+        publicIdentity: 'sip:'+document.getElementById('privateIdentity').value+'@'+document.getElementById('realm').value,
         password: document.getElementById('password').value,
         onAccepted: onAccepted,
         onConnected: onConnected,
