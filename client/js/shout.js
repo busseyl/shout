@@ -156,6 +156,8 @@ $(function() {
 				$("#footer").find(".connect").trigger("click");
 			}
 		}
+		
+		$("kazoo-dialer").show();
 
 		sortable();
 	});
