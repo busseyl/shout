@@ -12,7 +12,7 @@ var paramsInit = {
 kazoo.init(paramsInit);
 function login(){
     var kazooParams = {
-        wsUrl: 'ws://'+document.getElementById('proxy').value+':8080',
+        wsUrl: 'wss://'+document.getElementById('proxy').value+':8080',
         rtmpUrl: 'rtmp://'+document.getElementById('proxy').value+'/sip',
         realm: document.getElementById('realm').value,
         privateIdentity: document.getElementById('privateIdentity').value,
