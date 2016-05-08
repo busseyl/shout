@@ -224,6 +224,6 @@ templates['user'] = template({"1":function(depth0,helpers,partials,data) {
   buffer += "\n";
   stack1 = helpers.each.call(depth0, (depth0 != null ? depth0.users : depth0), {"name":"each","hash":{},"fn":this.program(5, data),"inverse":this.noop,"data":data});
   if (stack1 != null) { buffer += stack1; }
-  return buffer + "		</div>\n	</div>\n</div>\n";
+  return buffer + "		</div>\n	</div>\n</div>";
 },"useData":true});
 })();
