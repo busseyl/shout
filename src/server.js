@@ -127,6 +127,7 @@ function init(socket, client, token) {
 			networks: client.networks,
 			token: token || ""
 		});
+		socket.emit("voice.register", client.config.voice);
 	}
 }
 
