@@ -1,17 +1,4 @@
 $(function() {
-	var paramsInit = {
-	    forceRTMP: false,
-	    flashContainer: 'flash_div',
-	    onLoaded: function() {
-	        console.log('Loaded dialer');
-	    },
-	    onFlashMissing: function(container) {
-	        container.innerHTML = 'This content requires the Adobe Flash Player. <a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-	        container.className = 'demo-flash-error';
-	    }
-	};
-	kazoo.init(paramsInit);
-
 	var socket = io();
 	var commands = [
 		"/close",
@@ -173,27 +160,14 @@ $(function() {
 		sortable();
 	});
 
+	var userAgent;
 	socket.on("voice.register", function(config) {
-		var kazooParams = {
-	        wsUrl: 'wss://'+config.realm+':7443',
-	        rtmpUrl: 'rtmp://'+config.realm+'/sip',
-	        realm: config.realm,
-	        privateIdentity: config.username,
-	        publicIdentity: 'sip:' + config.username + '@' + config.realm,
-	        password: config.password,
-	        onAccepted: onAccepted,
-	        onConnected: onConnected,
-	        onHangup: onHangup,
-	        onCancel: onCancel,
-	        onIncoming: onIncoming,
-	        onConnecting: onConnecting,
-	        onTransfer: onTransfer,
-	        onNotified: onNotified,
-	        onError: onError,
-	        reconnectMaxAttempts: 3, // Unlimited autoreconnect attempts
-	        reconnectDelay: 5000 // New autoreconnect attempt every 5 seconds
-	    };
-	    kazoo.register(kazooParams);
+		userAgent = new SIP.UA({
+			uri: config.username + '@' + config.realm,
+	        wsServers: ['wss://'+config.realm+':7443'],
+	        authorizationUser: config.username,
+	        password: config.password
+	    });
 	});
 
 	socket.on("join", function(data) {
@@ -669,6 +643,19 @@ $(function() {
 		});
 	});
 
+	var session;
+	var sipJsOptions = {
+		media: {
+			contraints: {
+				audio: true,
+				video: true
+			},
+			render: {
+				remote: document.getElementById('remoteVideo'),
+				local: document.getElementById('localVideo')
+			}
+		}
+	};
 	chat.on("click", ".voice", function() {
 		var name = $(this).data("name");
 		var chan_id = $(this)
@@ -680,7 +667,8 @@ $(function() {
 			.find(".lobby")
 			.data("title");
 		var sip_to_uri = name + "@fs01.teamofmonkeys.net";
-		kazoo.connect(sip_to_uri);
+		
+		session = userAgent.invite('sip:' + sip_to_uri, sipJsOptions);
 	});
 
 	chat.on("click", ".close", function() {
@@ -1011,85 +999,5 @@ $(function() {
 			}
 		}
 	);
-
-	function onTransfer() {
-	}
-	function onIncoming(call) {
-	    console.log('onIncoming', call);
-	    var caller = call.callerName + (call.callerNumber ? ' ('+call.callerNumber+')' : '');
-	    confirmPopup(caller + ' is calling you! Pick up the call?', call.accept, call.reject);
-	}
-	function onConnecting() {
-	    console.log('Connecting...');
-	}
-	function onHangup() {
-	    console.log('Hangup');
-	}
-	function onCancel(status) {
-	    var msg = 'Your call has been canceled';
-	    if(status && status.message) { msg += ': ' + status.message; }
-	    if(status && status.code) { msg += ' (' + status.code + ')'; }
-	    console.log('info', msg);
-	    closePopup();
-	}
-	function onAccepted() {
-	}
-	function onConnected() {
-	}
-	function onNotified(notification) {
-	    switch(notification.key) {
-	        case 'replaced_registration': {
-	            if(document.getElementById('btnLogin').style.display === "none") { //Check to ignore double notifications
-	                logout();
-	                console.log('error', notification.message);
-	            }
-	            break;
-	        }
-	        case 'transfer_notification':
-	        case 'overriding_registration': {
-	            console.log('info', notification.message);
-	            break;
-	        }
-	        case 'connectivity_notification': {
-	            if(notification.status === 'offline') {
-	                console.log('warning', notification.message);
-	            } else {
-	                console.log('info', notification.message);
-	            }
-	            break;
-	        }
-	        case 'reconnecting_notification': {
-	            console.log('info', notification.message + '('+notification.attempt+')');
-	            break;
-	        }
-	        default: {
-	            console.log(notification.message);
-	        }
-	    }
-	}
-	function onError(error) {
-	    console.log('error', 'ERROR: ' + error.message);
-	    if(error.key === 'disconnected') {
-	        console.log('Disconnected: ', error);
-	    }
-	}
-	/* UI Binding */
-	function transfer() {
-	    var destination = document.getElementById('transferDestination').value;
-	    kazoo.transfer(destination);
-	};
-	function call() {
-	    var destination = document.getElementById('destination').value;
-	    kazoo.connect(destination);
-	}
-	function hangup() {
-	    kazoo.hangup();
-	}
-	function logout() {
-	    kazoo.logout();
-	}
-	function sendDTMF(dtmf) {
-	    kazoo.sendDTMF(dtmf);
-	}
 
 });
