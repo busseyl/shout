@@ -168,6 +168,17 @@ $(function() {
 	        authorizationUser: config.username,
 	        password: config.password
 	    });
+
+	    userAgent.on('invite', function (session) {
+		    session.accept({
+		        media: {
+		            render: {
+		                remote: document.getElementById('remoteVideo'),
+		                local: document.getElementById('localVideo')
+		            }
+		        }
+		    });
+		});
 	});
 
 	socket.on("join", function(data) {
@@ -668,7 +679,14 @@ $(function() {
 			.data("title");
 		var sip_to_uri = name + "@fs01.teamofmonkeys.net";
 		
-		session = userAgent.invite('sip:' + sip_to_uri, sipJsOptions);
+		session = userAgent.invite("sip:" + sip_to_uri, sipJsOptions);
+
+		$("#rtc").css("display", "block");
+		$("#windows").css({ height: "inherit" });
+		$("#windows").css({ top: $("#rtc").height()+"px" });
+		$(window).resize(function () {
+			$("#windows").css({ top: $("#rtc").height()+"px" });
+		});
 	});
 
 	chat.on("click", ".close", function() {

@@ -413,10 +413,20 @@ button, .user {
     top: 0;
     width: 100%;
 }
+video {
+    position: relative;
+    width: 50%;
+    float: left;
+}
+#rtc {
+    display: none;
+    position: absolute;
+    top: 0;
+}
 #windows {
     bottom: 48px;
     position: absolute;
-    top: 0px;
+    height: 100%;
     width: 100%;
 }
 #windows label {

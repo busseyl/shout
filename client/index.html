@@ -41,8 +41,10 @@
 			<button id="sign-out" class="icon sign-out" data-placement="top" title="Sign out"></button>
 		</footer>
 		<div id="main">
-			<div id="localVideo" style="display: none;"></div>
-			<div id="remoteVideo" style="display: none;"></div>
+			<div id="rtc">
+				<video id="remoteVideo"></video>
+				<video id="localVideo" muted="muted"></video>
+			</div>
 			<div id="windows">
 				<div id="chat" class="no-colors"></div>
 				<div id="sign-in" data-title="Sign in" class="window">
