@@ -45,8 +45,11 @@ templates['chat'] = template({"1":function(depth0,helpers,partials,data) {
     + "</span>\n		<span class=\"topic\">";
   stack1 = ((helpers.parse || (depth0 && depth0.parse) || helperMissing).call(depth0, (depth0 != null ? depth0.topic : depth0), {"name":"parse","hash":{},"data":data}));
   if (stack1 != null) { buffer += stack1; }
-  buffer += "</span>\n	</div>\n	<div class=\"chat\">\n		<div class=\"show-more ";
-  stack1 = ((helpers.equal || (depth0 && depth0.equal) || helperMissing).call(depth0, ((stack1 = (depth0 != null ? depth0.messages : depth0)) != null ? stack1.length : stack1), 100, {"name":"equal","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data}));
+  buffer += "</span>\n	</div>\n";
+  stack1 = ((helpers.equal || (depth0 && depth0.equal) || helperMissing).call(depth0, (depth0 != null ? depth0.type : depth0), "query", {"name":"equal","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data}));
+  if (stack1 != null) { buffer += stack1; }
+  buffer += "	<div class=\"chat\">\n		<div class=\"show-more ";
+  stack1 = ((helpers.equal || (depth0 && depth0.equal) || helperMissing).call(depth0, ((stack1 = (depth0 != null ? depth0.messages : depth0)) != null ? stack1.length : stack1), 100, {"name":"equal","hash":{},"fn":this.program(11, data),"inverse":this.noop,"data":data}));
   if (stack1 != null) { buffer += stack1; }
   return buffer + "\">\n			<button class=\"show-more-button\" data-id=\""
     + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
@@ -65,6 +68,13 @@ templates['chat'] = template({"1":function(depth0,helpers,partials,data) {
   },"7":function(depth0,helpers,partials,data) {
   return "						Leave\n";
   },"9":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
+  return "	<div class=\"rtc\" style=\"display: none;\">\n		<div class=\"remoteVideo\">\n			<video id=\"remoteVideo-"
+    + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
+    + "\" height=\"100%\" width=\"100%\"></video>\n		</div>\n		<div class=\"localVideo\">\n			<video id=\"localVideo-"
+    + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
+    + "\" height=\"100%\" width=\"100%\"></video>\n		</div>\n	</div>\n";
+},"11":function(depth0,helpers,partials,data) {
   return "show";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
   var stack1, buffer = "";
@@ -196,17 +206,15 @@ templates['user'] = template({"1":function(depth0,helpers,partials,data) {
 },"3":function(depth0,helpers,partials,data) {
   return "";
 },"5":function(depth0,helpers,partials,data) {
-  var stack1, helper, helperMissing=helpers.helperMissing, functionType="function", escapeExpression=this.escapeExpression, buffer = "";
+  var stack1, helper, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, functionType="function", buffer = "";
   stack1 = ((helpers.diff || (depth0 && depth0.diff) || helperMissing).call(depth0, (depth0 != null ? depth0.mode : depth0), {"name":"diff","hash":{},"fn":this.program(6, data),"inverse":this.noop,"data":data}));
   if (stack1 != null) { buffer += stack1; }
-  return buffer + "			<div class=\"wrapper\">\n				<button class=\"voice\" data-name=\""
-    + escapeExpression(((helper = (helper = helpers.name || (depth0 != null ? depth0.name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"name","hash":{},"data":data}) : helper)))
-    + "\"><i class=\"fa fa-lg fa-phone\" aria-hidden=\"true\"></i></button>\n				<button class=\"user\" style=\"color: #"
+  return buffer + "			<button class=\"user\" style=\"color: #"
     + escapeExpression(((helpers.stringcolor || (depth0 && depth0.stringcolor) || helperMissing).call(depth0, (depth0 != null ? depth0.name : depth0), {"name":"stringcolor","hash":{},"data":data})))
     + ";\">"
     + escapeExpression(((helper = (helper = helpers.mode || (depth0 != null ? depth0.mode : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"mode","hash":{},"data":data}) : helper)))
     + escapeExpression(((helper = (helper = helpers.name || (depth0 != null ? depth0.name : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"name","hash":{},"data":data}) : helper)))
-    + "</button>\n			</div>\n";
+    + "</button>\n";
 },"6":function(depth0,helpers,partials,data) {
   var stack1, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = "";
   stack1 = helpers.unless.call(depth0, (data && data.first), {"name":"unless","hash":{},"fn":this.program(7, data),"inverse":this.noop,"data":data});

@@ -19,6 +19,16 @@
 		<span class="title">{{name}}</span>
 		<span class="topic">{{{parse topic}}}</span>
 	</div>
+	{{#equal type "query"}}
+	<div class="rtc" style="display: none;">
+		<div class="remoteVideo">
+			<video id="remoteVideo-{{id}}" height="100%" width="100%"></video>
+		</div>
+		<div class="localVideo">
+			<video id="localVideo-{{id}}" height="100%" width="100%"></video>
+		</div>
+	</div>
+	{{/equal}}
 	<div class="chat">
 		<div class="show-more {{#equal messages.length 100}}show{{/equal}}">
 			<button class="show-more-button" data-id="{{id}}">

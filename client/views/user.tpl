@@ -13,10 +13,7 @@
 			{{/unless}}
 			<div class="user-mode {{modes mode}}">
 			{{/diff}}
-			<div class="wrapper">
-				<button class="voice" data-name="{{name}}"><i class="fa fa-lg fa-phone" aria-hidden="true"></i></button>
-				<button class="user" style="color: #{{stringcolor name}};">{{mode}}{{name}}</button>
-			</div>
+			<button class="user" style="color: #{{stringcolor name}};">{{mode}}{{name}}</button>
 		{{/each}}
 		</div>
 	</div>

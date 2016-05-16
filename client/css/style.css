@@ -413,16 +413,6 @@ button, .user {
     top: 0;
     width: 100%;
 }
-video {
-    position: relative;
-    width: 50%;
-    float: left;
-}
-#rtc {
-    display: none;
-    position: absolute;
-    top: 0;
-}
 #windows {
     bottom: 48px;
     position: absolute;
@@ -524,6 +514,27 @@ video {
 }
 #windows .window .header {
     display: none;
+}
+.rtc {
+    display: none;
+    position: absolute;
+    top: 58px;
+    bottom: 150px;
+    left: 0;
+    right: 0;
+}
+.remoteVideo {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+.localVideo {
+    position: absolute;
+    z-index: 1000;
+    height: 150px;
+    width: 150px;
+    bottom: 20px;
+    right: 20px;
 }
 #chat {
     bottom: 0;
@@ -822,15 +833,12 @@ video {
     width: 100%;
 }
 #chat .names button {
-    display: inline;
+    display: block;
     line-height: 1.6;
-    padding: 0 4px;
+    padding: 0 16px;
 }
 #chat .names .inner {
     width: 300px;
-}
-#chat .names .inner .wrapper {
-    display: block;
 }
 #chat .user-mode:before {
     content: "";
@@ -992,7 +1000,11 @@ video {
     -webkit-appearance: none;
     width: 100%;
 }
-#form #submit {
+#form .button-wrapper {
+    position: absolute;
+    right: 0;
+}
+#form .button-wrapper #submit {
     background: #f4f4f4;
     background-image: linear-gradient(#f4f4f4, #ececec);
     border: 1px solid #d7d7d7;
@@ -1001,12 +1013,60 @@ video {
     font: 12px Lato, sans-serif;
     color: #555;
     height: 34px;
-    position: absolute;
-    right: 0;
+    position: relative;
+    float: left;
     transition: opacity .3s;
     width: 58px;
+    margin-left: 6px;
 }
-
+#form .button-wrapper #audio {
+    background: #f4f4f4;
+    background-image: linear-gradient(#f4f4f4, #ececec);
+    border: 1px solid #d7d7d7;
+    border-bottom-color: #b7b7b7;
+    border-radius: 2px;
+    font: 12px Lato, sans-serif;
+    color: #555;
+    height: 34px;
+    position: relative;
+    float: left;
+    transition: opacity .3s;
+    width: 58px;
+    margin-left: 6px;
+    display: none;
+}
+#form .button-wrapper #video {
+    background: #f4f4f4;
+    background-image: linear-gradient(#f4f4f4, #ececec);
+    border: 1px solid #d7d7d7;
+    border-bottom-color: #b7b7b7;
+    border-radius: 2px;
+    font: 12px Lato, sans-serif;
+    color: #555;
+    height: 34px;
+    position: relative;
+    float: left;
+    transition: opacity .3s;
+    width: 58px;
+    margin-left: 6px;
+    display: none;
+}
+#form .button-wrapper #hangup {
+    background: #f4f4f4;
+    background-image: linear-gradient(#f4f4f4, #ececec);
+    border: 1px solid #d7d7d7;
+    border-bottom-color: #b7b7b7;
+    border-radius: 2px;
+    font: 12px Lato, sans-serif;
+    color: #555;
+    height: 34px;
+    position: relative;
+    float: left;
+    transition: opacity .3s;
+    width: 58px;
+    margin-left: 6px;
+    display: none;
+}
 
 /**
   * IRC Message Styling

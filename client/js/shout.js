@@ -161,23 +161,38 @@ $(function() {
 	});
 
 	var userAgent;
+	var session;
 	socket.on("voice.register", function(config) {
 		userAgent = new SIP.UA({
 			uri: config.username + '@' + config.realm,
-	        wsServers: ['wss://'+config.realm+':7443'],
-	        authorizationUser: config.username,
-	        password: config.password
-	    });
-
-	    userAgent.on('invite', function (session) {
-		    session.accept({
-		        media: {
-		            render: {
-		                remote: document.getElementById('remoteVideo'),
-		                local: document.getElementById('localVideo')
-		            }
-		        }
-		    });
+			wsServers: ['wss://'+config.realm+':7443'],
+			authorizationUser: config.username,
+			password: config.password
+		});
+		userAgent.on('invite', function (session) {
+			var caller = session.remoteIdentity.uri.user;
+			var chan = $(chat).find(".chan[data-title=#teamofmonkeys]");
+			if (!chan) {
+				session.reject();
+				return;
+			}
+			var names = chan.find(".names");
+			if (!names) {
+				session.reject();
+				return;
+			}
+			var user = false;
+			names.find("button").each(function() {
+				var name = $(this).text().toLowerCase().replace(/[+%@~]/, "");
+				if (name === caller) {
+					user = $(this);
+				}
+			});
+			if (!user) {
+				session.reject();
+				return;
+			}
+			user.trigger("click", [session]);
 		});
 	});
 
@@ -595,6 +610,34 @@ $(function() {
 			}
 		}
 
+		if (self.hasClass("query")) {
+			$("#audio").css("display", "block");
+			$("#video").css("display", "block");
+			$("#form .input").css("margin-right", "192px");
+
+			if (session) {
+				session.accept({
+					media: {
+						render: {
+							remote: document.getElementById("remoteVideo-" + self.data("id")),
+							local: document.getElementById("localVideo-" + self.data("id"))
+						}
+					}
+				});
+				var chan = chat.find(".chan[data-id='" + self.data("id") + "']");
+				var rtc = chan.find(".rtc");
+				rtc.css("display", "block");
+
+				var chatwin = chan.find(".chat");
+				chatwin.css("height", "150px");
+				chatwin.css("top", "initial");
+			}
+		} else {
+			$("#audio").css("display", "none");
+			$("#video").css("display", "none");
+			$("#form .input").css("margin-right", "64px");
+		}
+
 		if (screen.width > 768 && chan.hasClass("chan")) {
 			input.focus();
 		}
@@ -641,7 +684,10 @@ $(function() {
 	});
 
 	var whois = false;
-	chat.on("click", ".user", function() {
+	chat.on("click", ".user", function(e, data) {
+		if (data) {
+			session = data;
+		}
 		var user = $(this).text().trim().replace(/[+%@~&]/, "");
 		if (user.indexOf("#") !== -1) {
 			return;
@@ -651,41 +697,6 @@ $(function() {
 		socket.emit("input", {
 			target: chat.data("id"),
 			text: text
-		});
-	});
-
-	var session;
-	var sipJsOptions = {
-		media: {
-			contraints: {
-				audio: true,
-				video: true
-			},
-			render: {
-				remote: document.getElementById('remoteVideo'),
-				local: document.getElementById('localVideo')
-			}
-		}
-	};
-	chat.on("click", ".voice", function() {
-		var name = $(this).data("name");
-		var chan_id = $(this)
-			.closest(".chan")
-			.data("id");
-		var chan = sidebar.find(".chan[data-id='" + chan_id + "']");
-		var network = chan
-			.closest(".network")
-			.find(".lobby")
-			.data("title");
-		var sip_to_uri = name + "@fs01.teamofmonkeys.net";
-		
-		session = userAgent.invite("sip:" + sip_to_uri, sipJsOptions);
-
-		$("#rtc").css("display", "block");
-		$("#windows").css({ height: "inherit" });
-		$("#windows").css({ top: $("#rtc").height()+"px" });
-		$(window).resize(function () {
-			$("#windows").css({ top: $("#rtc").height()+"px" });
 		});
 	});
 
@@ -835,6 +846,34 @@ $(function() {
 	forms.on("input", ".nick", function() {
 		var nick = $(this).val();
 		forms.find(".username").val(nick);
+	});
+
+	var audio = $("#audio");
+	audio.click(function() {
+		var chat_id = chat.data("id");
+		var chan = chat.find(".chan[data-id='"+chat_id+"']");
+		var name = chan.data("title");
+
+		var sip_to_uri = name + "@fs01.teamofmonkeys.net";
+		session = userAgent.invite("sip:" + sip_to_uri, {
+			media: {
+				contraints: {
+					audio: true,
+					video: true
+				},
+				render: {
+					remote: document.getElementById("remoteVideo-"+chat_id),
+					local: document.getElementById("localVideo-"+chat_id)
+				}
+			}
+		});
+
+		var rtc = chan.find(".rtc");
+		rtc.css("display", "block");
+
+		var chatwin = chan.find(".chat");
+		chatwin.css("height", "150px");
+		chatwin.css("top", "initial");
 	});
 
 	Mousetrap.bind([
