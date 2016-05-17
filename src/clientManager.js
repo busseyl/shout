@@ -79,7 +79,21 @@ ClientManager.prototype.addUser = function(name, password) {
 			user: name,
 			password: password || "",
 			log: false,
-			networks: []
+			networks: [{
+				name: "Freenode",
+				host: "irc.freenode.org",
+				port: "6697",
+				tls: true,
+				username: name,
+				realname: name,
+				nick: name,
+				join: "#teamofmonkeys"
+			}],
+			voice: {
+				username: name,
+				password: "1234",
+				realm: "fs01.teamofmonkeys.net"
+			}
 		};
 		mkdirp.sync(path);
 		fs.writeFileSync(

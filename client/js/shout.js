@@ -169,16 +169,19 @@ $(function() {
 			authorizationUser: config.username,
 			password: config.password
 		});
-		userAgent.on('invite', function (session) {
-			var caller = session.remoteIdentity.uri.user;
+
+		session = null;
+		userAgent.on('invite', function (incoming_session) {
+			session = null;
+			var caller = incoming_session.remoteIdentity.uri.user;
 			var chan = $(chat).find(".chan[data-title=#teamofmonkeys]");
 			if (!chan) {
-				session.reject();
+				incoming_session.reject();
 				return;
 			}
 			var names = chan.find(".names");
 			if (!names) {
-				session.reject();
+				incoming_session.reject();
 				return;
 			}
 			var user = false;
@@ -189,10 +192,11 @@ $(function() {
 				}
 			});
 			if (!user) {
-				session.reject();
+				incoming_session.reject();
 				return;
 			}
-			user.trigger("click", [session]);
+			session = incoming_session;
+			user.click();
 		});
 	});
 
@@ -313,6 +317,39 @@ $(function() {
 	}
 
 	socket.on("msg", function(data) {
+		if (session && session.status === 4) {
+			session.accept({
+				media: {
+					render: {
+						remote: document.getElementById("remoteVideo-" + chat.data("id")),
+						local: document.getElementById("localVideo-" + chat.data("id"))
+					}
+				}
+			});
+
+			var chan = chat.find(".chan[data-id='" + chat.data("id") + "']");
+			var rtc = chan.find(".rtc");
+			rtc.css("display", "block");
+
+			var chatwin = chan.find(".chat");
+			chatwin.css("height", "150px");
+			chatwin.css("top", "initial");
+
+			$("#hangup").css("display", "block");
+			$("#video").css("display", "none");
+			$("#form .input").css("margin-right", "128px");
+
+			session.on("bye", function() {
+				rtc.css("display", "none");
+				chatwin.css("height", "");
+				chatwin.css("top", "58px");
+				$("#hangup").css("display", "none");
+				$("#video").css("display", "block");
+				$("#form .input").css("margin-right", "128px");
+				session = null;
+			});
+		}
+
 		var msg = buildChatMessage(data);
 		var target = "#chan-" + data.chan;
 		chat.find(target + " .messages")
@@ -611,19 +648,18 @@ $(function() {
 		}
 
 		if (self.hasClass("query")) {
-			$("#audio").css("display", "block");
-			$("#video").css("display", "block");
-			$("#form .input").css("margin-right", "192px");
+			$("#form .input").css("margin-right", "128px");
 
 			if (session) {
-				session.accept({
-					media: {
-						render: {
-							remote: document.getElementById("remoteVideo-" + self.data("id")),
-							local: document.getElementById("localVideo-" + self.data("id"))
-						}
-					}
-				});
+				// session.accept({
+				// 	media: {
+				// 		render: {
+				// 			remote: document.getElementById("remoteVideo-" + self.data("id")),
+				// 			local: document.getElementById("localVideo-" + self.data("id"))
+				// 		}
+				// 	}
+				// });
+
 				var chan = chat.find(".chan[data-id='" + self.data("id") + "']");
 				var rtc = chan.find(".rtc");
 				rtc.css("display", "block");
@@ -631,9 +667,25 @@ $(function() {
 				var chatwin = chan.find(".chat");
 				chatwin.css("height", "150px");
 				chatwin.css("top", "initial");
+
+				$("#hangup").css("display", "block");
+				$("#video").css("display", "none");
+
+				session.on("bye", function() {
+					rtc.css("display", "none");
+					chatwin.css("height", "");
+					chatwin.css("top", "58px");
+					$("#hangup").css("display", "none");
+					$("#video").css("display", "block");
+					$("#form .input").css("margin-right", "128px");
+					session = null;
+				});
+			} else {
+				$("#hangup").css("display", "none");
+				$("#video").css("display", "block");
 			}
 		} else {
-			$("#audio").css("display", "none");
+			$("#hangup").css("display", "none");
 			$("#video").css("display", "none");
 			$("#form .input").css("margin-right", "64px");
 		}
@@ -684,10 +736,7 @@ $(function() {
 	});
 
 	var whois = false;
-	chat.on("click", ".user", function(e, data) {
-		if (data) {
-			session = data;
-		}
+	chat.on("click", ".user", function(e) {
 		var user = $(this).text().trim().replace(/[+%@~&]/, "");
 		if (user.indexOf("#") !== -1) {
 			return;
@@ -859,6 +908,31 @@ $(function() {
 			media: {
 				contraints: {
 					audio: true,
+					video: false
+				},
+				render: {
+					remote: document.getElementById("remoteAudio-"+chat_id),
+					local: document.getElementById("localAudio-"+chat_id)
+				}
+			}
+		});
+
+		$("#hangup").css("display", "block");
+		$("#video").css("display", "none");
+		$("#form .input").css("margin-right", "128px");
+	});
+
+	var video = $("#video");
+	video.click(function() {
+		var chat_id = chat.data("id");
+		var chan = chat.find(".chan[data-id='"+chat_id+"']");
+		var name = chan.data("title");
+
+		var sip_to_uri = name + "@fs01.teamofmonkeys.net";
+		session = userAgent.invite("sip:" + sip_to_uri, {
+			media: {
+				contraints: {
+					audio: true,
 					video: true
 				},
 				render: {
@@ -874,6 +948,27 @@ $(function() {
 		var chatwin = chan.find(".chat");
 		chatwin.css("height", "150px");
 		chatwin.css("top", "initial");
+
+		$("#hangup").css("display", "block");
+		$("#video").css("display", "none");
+		$("#form .input").css("margin-right", "128px");
+
+		session.on("bye", function() {
+			rtc.css("display", "none");
+			chatwin.css("height", "");
+			chatwin.css("top", "58px");
+
+			$("#hangup").css("display", "none");
+			$("#video").css("display", "block");
+			$("#form .input").css("margin-right", "128px");
+			session = null;
+		});
+	});
+
+	var hangup = $("#hangup");
+	hangup.click(function () {
+		if(!session) return;
+		session.bye();
 	});
 
 	Mousetrap.bind([

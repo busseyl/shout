@@ -71,9 +71,13 @@ templates['chat'] = template({"1":function(depth0,helpers,partials,data) {
   var helper, functionType="function", helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
   return "	<div class=\"rtc\" style=\"display: none;\">\n		<div class=\"remoteVideo\">\n			<video id=\"remoteVideo-"
     + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
-    + "\" height=\"100%\" width=\"100%\"></video>\n		</div>\n		<div class=\"localVideo\">\n			<video id=\"localVideo-"
+    + "\" height=\"100%\" width=\"100%\"></video>\n			<audio id=\"remoteAudio-"
     + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
-    + "\" height=\"100%\" width=\"100%\"></video>\n		</div>\n	</div>\n";
+    + "\" style=\"display: none;\"></audio>\n		</div>\n		<div class=\"localVideo\">\n			<video id=\"localVideo-"
+    + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
+    + "\" height=\"100%\" width=\"100%\" muted=\"muted\"></video>\n			<audio id=\"localAudio-"
+    + escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helperMissing),(typeof helper === functionType ? helper.call(depth0, {"name":"id","hash":{},"data":data}) : helper)))
+    + "\" style=\"display: none;\" muted=\"muted\"></audio>\n		</div>\n	</div>\n";
 },"11":function(depth0,helpers,partials,data) {
   return "show";
   },"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {

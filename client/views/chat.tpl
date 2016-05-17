@@ -23,9 +23,11 @@
 	<div class="rtc" style="display: none;">
 		<div class="remoteVideo">
 			<video id="remoteVideo-{{id}}" height="100%" width="100%"></video>
+			<audio id="remoteAudio-{{id}}" style="display: none;"></audio>
 		</div>
 		<div class="localVideo">
-			<video id="localVideo-{{id}}" height="100%" width="100%"></video>
+			<video id="localVideo-{{id}}" height="100%" width="100%" muted="muted"></video>
+			<audio id="localAudio-{{id}}" style="display: none;" muted="muted"></audio>
 		</div>
 	</div>
 	{{/equal}}
